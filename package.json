@@ -1,4 +1,6 @@
 {
+  "version": "0.0.1",
+  "description": "Form validations library based on Vue.js 2 reactivity system",
   "dependencies": {
     "lodash.get": "^4.4.2",
     "lodash.merge": "^4.6.2",

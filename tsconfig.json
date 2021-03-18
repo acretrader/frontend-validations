@@ -1,9 +1,15 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es2017",
-    "sourceMap": true
+    "module": "esnext",
+    "target": "esnext",
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "allowJs": true,
+    "outDir": "dist/"
   },
+  "include": [
+    "src/"
+  ],
   "exclude": [
     "node_modules"
   ]

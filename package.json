@@ -1,4 +1,5 @@
 {
+  "name": "@acretrader/validdations",
   "version": "0.0.1",
   "description": "Form validations library based on Vue.js 2 reactivity system",
   "scripts": {

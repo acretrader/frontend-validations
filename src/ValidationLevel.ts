@@ -4,56 +4,66 @@ import { isObject } from './utils';
 import { withParamsFuncName } from './helpers';
 
 export default class ValidationLevel {
-  constructor({ rules = {}, model, parent, ownKey }) {
+  private _dirty: boolean;
+  private _parent: ValidationLevel | undefined;
+  private _ownKey: string | undefined;
+  private _model: object | undefined;
+  $rules: object;
+  $params: object;
+
+  constructor(rules: object = {}, model: object | ValidationLevel, ownKey?: string) {
+    if (model instanceof  ValidationLevel) {
+      this.$set('_parent', model);
+    } else {
+      this.$set('_model', model);
+    }
     this.$setAll({
       _dirty: false,
       $params: {},
       $rules: rules,
-      _parent: parent,
       _ownKey: ownKey,
-      _model: model,
     });
     this._setValidations();
   }
 
-  get _keys() {
+  get _keys(): string[] {
     return Object.keys(this.$rules);
   }
 
-  get _nestedKeys() {
+  get _nestedKeys(): string[] {
     return this._keys.filter(k => this._getIsKeyNested(k));
   }
 
-  get _ruleKeys() {
+  get _ruleKeys(): string[] {
     return this._keys.filter(k => !this._getIsKeyNested(k));
   }
 
-  get $dirty() {
+  get $dirty(): boolean {
     return Boolean(this._dirty || (this._nestedKeys.length && this._nestedKeys.every(k => this[k].$dirty)));
   }
 
-  get $invalid() {
-    return this._ruleKeys.some(k => !this[k])
-    || this._nestedKeys.some(k => this[k].$invalid);
+  get $invalid(): boolean {
+    return this._ruleKeys.some((k: string): boolean => !this[k])
+    || this._nestedKeys.some((k: string): boolean => this[k].$invalid);
   }
 
-  get $error() {
+  get $error(): boolean {
     return this.$dirty && this.$invalid;
   }
 
-  get $parentModel() {
+  get $parentModel(): object | string | number | boolean | null {
     return this._parent ? this._parent.$model : null;
   }
 
-  get $model() {
+  get $model() : object | string | number | boolean {
     return this.$parentModel ? this.$parentModel[this._ownKey] : this._model;
   }
 
-  $set(name, value, model = this) {
+  $set(name: string, value: any, model: object = this) {
     Vue.set(model, name, value);
   }
 
-  $setAll(data, model = this) {
+  $setAll(data: object, model: object = this) {
     if (!data || typeof data !== 'object') return;
     Object.entries(data)
       .forEach(([key, value]) => {
@@ -67,37 +77,33 @@ export default class ValidationLevel {
       });
   }
 
-  _setDirty(isDirty) {
+  _setDirty(isDirty: boolean): void {
     this.$set('_dirty', isDirty);
     this._nestedKeys.forEach((k) => {
       this[k]._setDirty(isDirty);
     });
   }
 
-  _getIsKeyNested(key) {
+  private _getIsKeyNested(key: string): boolean {
     return typeof this.$rules[key] !== 'function';
   }
 
-  _setValidations() {
+  private _setValidations(): void {
     this._setNested();
     this._setRules();
   }
 
-  _setNested() {
+  private _setNested(): void {
     this._nestedKeys.forEach((k) => {
       if (this[k]) {
         this[k].$addRules(this.$rules[k]);
       } else {
-        this[k] = new ValidationLevel({
-          rules: this.$rules[k],
-          parent: this,
-          ownKey: k,
-        });
+        this[k] = new ValidationLevel(this.$rules[k], this, k);
       }
     });
   }
 
-  _setRules() {
+  private _setRules(): void {
     this._ruleKeys.forEach((k) => {
       if (this[k] !== undefined) return;
       let validator = this.$rules[k];
@@ -113,15 +119,15 @@ export default class ValidationLevel {
     });
   }
 
-  $touch() {
+  public $touch(): void {
     this._setDirty(true);
   }
 
-  $reset() {
+  public $reset(): void {
     this._setDirty(false);
   }
 
-  $addRules(rules) {
+  public $addRules(rules: object): void {
     this.$setAll({ $rules: merge(this.$rules, rules) });
     this._setValidations();
   }

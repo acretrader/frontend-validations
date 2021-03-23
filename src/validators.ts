@@ -1,11 +1,13 @@
 import get from 'lodash.get';
 import { withParams, getValidatorResult } from './helpers';
+import * as validatorsImport from './validators';
+import { ModelType } from './types';
 
-import * as validators from './validators'; // eslint-disable-line
+const validators: { [index: string]: Function } = validatorsImport;
 
 const emailRegex = /^(?:[A-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]{2,}(?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/; // eslint-disable-line
 
-const getLength = (value) => {
+const getLength = (value: any): number => {
   if (Array.isArray(value)) return value.length;
   if (typeof value === 'object') {
     return Object.keys(value).length;
@@ -13,7 +15,7 @@ const getLength = (value) => {
   return String(value).length;
 };
 
-const requiredValidator = (value) => {
+const requiredValidator = (value: any): boolean => {
   if (Array.isArray(value)) return !!value.length;
   if (value === undefined || value === null) {
     return false;
@@ -31,18 +33,18 @@ const requiredValidator = (value) => {
   return !!String(value).trim().length;
 };
 
-const birthdayValidator = (value) => {
+const birthdayValidator = (value: string): boolean => {
   if (!requiredValidator(value)) return true;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const parts = value.split('-');
-  const year = parseInt(parts[0], 10);
-  const month = parseInt(parts[1], 10);
-  const day = parseInt(parts[2], 10);
+  const parts: string[] = value.split('-');
+  const year: number = parseInt(parts[0], 10);
+  const month: number = parseInt(parts[1], 10);
+  const day: number = parseInt(parts[2], 10);
 
   // Check the ranges of month and year
   if (year < 1900 || month < 1 || month > 12) return false;
 
-  const monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  const monthLength: number[] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
   // Adjust for leap years
   if (year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0)) monthLength[1] = 29;
@@ -51,16 +53,20 @@ const birthdayValidator = (value) => {
   return day > 0 && day <= monthLength[month - 1];
 };
 
-const futureDateValidator = value => new Date(value) < new Date();
+const futureDateValidator = (value: string): boolean => new Date(value) < new Date();
 
-export const maxDate = param => helpers.withParams(
-    { type: 'maxValueDate', value: param },
-    value => !requiredValidator(value) || +(new Date(value)) <= +(new Date(param)),
+export const maxDate = (param: string ) => withParams(
+    { type: 'maxDate', value: param },
+    (value: string): boolean => (
+        !requiredValidator(value) || +(new Date(value)) <= +(new Date(param))
+    ),
 );
 
-export const minDate = param => withParams(
-    { type: 'minValueDate', value: param },
-    value => !requiredValidator(value) || +(new Date(value)) >= +(new Date(param)),
+export const minDate = (param: string) => withParams(
+    { type: 'minDate', value: param },
+    (value: string): boolean => (
+        !requiredValidator(value) || +(new Date(value)) >= +(new Date(param))
+    ),
 );
 
 /**
@@ -68,36 +74,38 @@ export const minDate = param => withParams(
  * @param param
  * @returns {*}
  */
-export const oneOf = param => withParams(
+export const oneOf = (param: string[]) => withParams(
     { type: 'oneOf', value: param },
-    () => true,
+    (): boolean => true,
 );
 
-export const manyOf = param => withParams(
+export const manyOf = (param: string[]) => withParams(
     { type: 'manyOf', value: param },
-    () => true,
+    (): boolean => true,
 );
 
-export const eql = param => withParams(
+export const eql = (param: any) => withParams(
     { type: 'eql', value: param },
-    value => (!requiredValidator(value) || value === param),
+    (value: any): boolean => (!requiredValidator(value) || value === param),
 );
 
 export const equal = eql;
 
-export const notEql = param => withParams(
+export const notEql = (param: any) => withParams(
     { type: 'notEql', value: param },
-    value => (!requiredValidator(value) || value !== param),
+    (value: any): boolean => (!requiredValidator(value) || value !== param),
 );
 
-export const required = param => withParams(
+export const required = (param: any) => withParams(
     { type: 'required', value: param },
     requiredValidator,
 );
 
-export const requiredIf = param => withParams(
+export const requiredIf = (param: string) => withParams(
     { type: 'requiredIf', value: param },
-    (value, model) => (model[param] ? requiredValidator(value) : true),
+    (value: any, model: ModelType): boolean => (
+        model[param] ? requiredValidator(value) : true
+    ),
 );
 
 /**
@@ -108,11 +116,11 @@ export const requiredIf = param => withParams(
  * @param {string|Array} param[1] - value to locator be equal
  * @returns boolean
  */
-export const requiredIfEqual = (param, rootModel) => withParams(
+export const requiredIfEqual = (param: [string, any], rootModel: ModelType) => withParams(
     { type: 'requiredIfEqual', value: param },
-    (value) => {
-      const val = get(rootModel, param[0]);
-      const equalTo = param[1];
+    (value: any): boolean => {
+      const val: any = get(rootModel, param[0]);
+      const equalTo: any = param[1];
       // second param can be array
       const isEqual = Array.isArray(equalTo) ? equalTo.includes(val) : val === equalTo;
       return isEqual ? requiredValidator(value) : true;
@@ -127,11 +135,11 @@ export const requiredIfEqual = (param, rootModel) => withParams(
  * @param {string|Array} param[1] - value to locator be equal
  * @returns boolean
  */
-export const requiredIfNotEqual = (param, rootModel) => withParams(
+export const requiredIfNotEqual = (param: [string, any], rootModel: ModelType) => withParams(
     { type: 'requiredIfNotEqual', value: param },
-    (value) => {
-      const val = get(rootModel, param[0]);
-      const equalTo = param[1];
+    (value: any): boolean => {
+      const val: any = get(rootModel, param[0]);
+      const equalTo: any = param[1];
       // second param can be array
       const isEqual = Array.isArray(equalTo) ? equalTo.includes(val) : val === equalTo;
       return isEqual ? true : requiredValidator(value);
@@ -144,9 +152,11 @@ export const requiredIfNotEqual = (param, rootModel) => withParams(
  * @param {Object} rootModel
  * @returns boolean
  */
-export const requiredIfAtRoot = (param, rootModel) => withParams(
+export const requiredIfAtRoot = (param: string, rootModel: ModelType) => withParams(
     { type: 'requiredIfAtRoot', value: param },
-    value => (get(rootModel, param) ? requiredValidator(value) : true),
+    (value: any): boolean => (
+        get(rootModel, param) ? requiredValidator(value) : true
+    ),
 );
 
 /**
@@ -155,23 +165,27 @@ export const requiredIfAtRoot = (param, rootModel) => withParams(
  * @param {Object} rootModel
  * @returns boolean
  */
-export const requiredIfAnd = (param, rootModel) => withParams(
+export const requiredIfAnd = (param: object, rootModel: ModelType) => withParams(
     { type: 'requiredIfAnd', value: param },
-    (value, vm) => Object.entries(param)
-    .some(([validatorName, validatorParam]) => {
-      const validator = validators[validatorName];
-      return (validator && getValidatorResult(validator(validatorParam, rootModel), value, vm));
+    (value: any, model: ModelType) => Object.entries(param)
+    .some(([validatorName, validatorParam]): boolean => {
+      const validator: Function = validators[validatorName];
+      return (validator && getValidatorResult(validator(validatorParam, rootModel), value, model));
     }),
 );
 
-export const requiredUnless = param => withParams(
+export const requiredUnless = (param: string) => withParams(
     { type: 'requiredUnless', value: param },
-    (value, vm) => (!get(vm, param) ? requiredValidator(value) : true),
+    (value: any, model: ModelType): boolean => (
+        !get(model, param) ? requiredValidator(value) : true
+    ),
 );
 
-export const requiredUnlessAtRoot = (param, rootModel) => withParams(
+export const requiredUnlessAtRoot = (param: string, rootModel: ModelType) => withParams(
     { type: 'requiredUnlessAtRoot', value: param },
-    value => (!get(rootModel, param) ? requiredValidator(value) : true),
+    (value: any): boolean => (
+        !get(rootModel, param) ? requiredValidator(value) : true
+    ),
 );
 
 /**
@@ -182,38 +196,44 @@ export const requiredUnlessAtRoot = (param, rootModel) => withParams(
  * @param {Number} param[1] - index of checkbox to check
  * @returns boolean
  */
-export const requiredIfCheckbox = (param, rootModel) => withParams(
+export const requiredIfCheckbox = (param: [string, number], rootModel: ModelType) => withParams(
     { type: 'requiredIfCheckbox', value: param },
     // eslint-disable-next-line no-bitwise
-    value => (rootModel[param[0]] & (2 ** param[1]) ? requiredValidator(value) : true),
+    (value: any) => {
+      const rootValue = rootModel[param[0]];
+      if (typeof rootValue !== 'number') return true;
+      rootValue & (2 ** param[1]) ? requiredValidator(value) : true
+    },
 );
 
-export const regex = param => withParams(
+export const regex = (param: string) => withParams(
     { type: 'regex', value: param },
-    value => !requiredValidator(value) || new RegExp(param).test(value),
+    (value: string): boolean => (
+      !requiredValidator(value) || new RegExp(param).test(value)
+    ),
 );
 
-export const password = param => withParams(
+export const password = (param: boolean) => withParams(
     { type: 'password', value: param },
-    value => !requiredValidator(value) || /\S{8,}/.test(value),
+    (value: any) => !requiredValidator(value) || /\S{8,}/.test(value),
 );
 
-export const email = param => withParams(
+export const email = (param: boolean) => withParams(
     { type: 'email', value: param },
-    value => !requiredValidator(value) || emailRegex.test(value),
+    (value: any): boolean => !requiredValidator(value) || emailRegex.test(value),
 );
 
-export const futureDate = param => withParams(
+export const futureDate = (param: boolean) => withParams(
     { type: 'futureDate', value: param },
-    (value) => {
+    (value: any): boolean => {
       if (!requiredValidator(value) || !birthdayValidator(value)) return true;
       return futureDateValidator(value);
     },
 );
 
-export const legalAge = param => withParams(
+export const legalAge = (param: boolean) => withParams(
     { type: 'legalAge', value: param },
-    (value) => {
+    (value: any): boolean => {
       if (!requiredValidator(value) || !birthdayValidator(value)
           || !futureDateValidator(value)) return true;
       const maxDateParam = +(new Date(new Date().setFullYear(new Date().getFullYear() - 18)));
@@ -221,31 +241,33 @@ export const legalAge = param => withParams(
     },
 );
 
-export const birthday = param => withParams(
+export const birthday = (param: boolean) => withParams(
     { type: 'birthday', value: param },
     birthdayValidator,
 );
 
-export const minLength = param => withParams(
+export const minLength = (param: number) => withParams(
     { type: 'minLength', value: param },
-    value => (!requiredValidator(value) || getLength(value) >= param),
+    (value: any): boolean => (
+      !requiredValidator(value) || getLength(value) >= param
+    ),
 );
 
-export const maxLength = param => withParams(
+export const maxLength = (param: number) => withParams(
     { type: 'maxLength', value: param },
-    value => (!requiredValidator(value) || getLength(value) <= param),
+    (value: any): boolean => (!requiredValidator(value) || getLength(value) <= param),
 );
 
-export const minValue = param => withParams(
+export const minValue = (param: number | string) => withParams(
     { type: 'minValue', value: param },
-    value => (
+    (value: any): boolean => (
         !requiredValidator(value) || ((!/\s/.test(value) || value instanceof Date) && +value >= +param)
     ),
 );
 
-export const maxValue = param => withParams(
+export const maxValue = (param: number | string) => withParams(
     { type: 'maxValue', value: param },
-    value => (
+    (value: any): boolean => (
         !requiredValidator(value) || ((!/\s/.test(value) || value instanceof Date) && +value <= +param)
     ),
 );

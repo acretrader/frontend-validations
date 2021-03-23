@@ -11,7 +11,11 @@ export default class ValidationLevel {
   private _ownKey: string | undefined;
   private _model: object | undefined;
   $rules: RulesType;
-  $params: { [index: string]: object };
+  $params: {
+    [index: string]: any,
+    message: string,
+    value: any,
+  };
 
   constructor(rules: object = {}, model: ModelType | ValidationLevel, ownKey?: string) {
     if (model instanceof  ValidationLevel) {

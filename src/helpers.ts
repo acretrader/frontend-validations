@@ -1,25 +1,35 @@
 import { upperFirst } from './utils';
-import * as validators from './validators';
-import * as errorMessages from './error-messages';
+import * as validatorsImport from './validators';
+import * as errorMessagesImport from './error-messages';
+import ValidationLevel from './ValidationLevel';
 
 export const withParamsFuncName = '__validatorWithParams';
 
-export function withParams(params, validator) {
+const validators: { [index: string]: Function } = validatorsImport;
+const errorMessages: { [index: string]: Function} = errorMessagesImport;
+
+type withParamsResultType = {
+  [index: string]: object | Function,
+  $params: object,
+  $validator: Function
+}
+
+export function withParams(params: object, validator: Function): Function {
   if (validator.name === withParamsFuncName) {
-    const { $params, $validator } = validator();
+    const { $params, $validator }: withParamsResultType = validator();
     return withParams(Object.assign($params, params), $validator);
   }
-  return function __validatorWithParams() {
+  return function __validatorWithParams(): withParamsResultType {
     return {
       $params: params,
-      $validator: (...args) => validator.apply(this, args),
+      $validator: (...args: any[]) => validator.apply(this, args),
     };
   };
 }
 
-export function getValidatorResult(validator, ...args) {
+export function getValidatorResult(validator: Function, ...args: any[]): boolean {
   if (validator.name === withParamsFuncName) {
-    const { $validator } = validator();
+    const { $validator }: withParamsResultType = validator();
     validator = $validator; // eslint-disable-line no-param-reassign
   }
   return validator(...args);
@@ -28,11 +38,10 @@ export function getValidatorResult(validator, ...args) {
 
 /**
  * Get validator by validator name
- * It can be built ib vuelidate validator or project`s custom validator
  * @param valName
  * @returns {*}
  */
-export function getValidator(valName) {
+export function getValidator(valName: string): Function | false {
   const validator = validators[valName];
   if (validator) {
     return validator;
@@ -46,8 +55,8 @@ export function getValidator(valName) {
  * @param params
  * @param fieldName
  */
-export function getSingleFieldRulesByParams(params = {}, fieldName) {
-  const fieldRules = {};
+export function getSingleFieldRulesByParams(params: object = {}, fieldName: string) {
+  const fieldRules: { [index: string]: any } = {};
   Object.entries(params).forEach(([validatorName, valParams]) => {
     // if value false, means rule is switch off
     if (valParams === false || valParams === undefined || valParams === null) return;
@@ -67,18 +76,18 @@ export function getSingleFieldRulesByParams(params = {}, fieldName) {
     // All required variant should be added as required param
     const validatorKey = validatorName.startsWith('required') ? 'required' : validatorName;
     fieldRules[validatorKey] = withParams(
-        { fieldName, validatorParam, message },
-        rule,
+      { fieldName, validatorParam, message },
+      rule,
     );
     // Add validator legal age by default to field birthday
     if (validatorKey === 'birthday') {
       fieldRules.legalAge = withParams(
           { fieldName, validatorParam },
-          getValidator('legalAge')(),
+          validators.legalAge(),
       );
       fieldRules.futureDate = withParams(
           { fieldName, validatorParam },
-          getValidator('futureDate')(),
+          validators.futureDate(),
       );
     }
   });
@@ -89,8 +98,8 @@ export function getSingleFieldRulesByParams(params = {}, fieldName) {
  * Get validation rules for all fields by params from api
  * @param params
  */
-export function getFieldsRulesByParams(params) {
-  const rules = {};
+export function getFieldsRulesByParams(params: {[index: string]: any}) {
+  const rules: {[index: string]: any} = {};
   Object.entries(params).forEach(([fieldName, fieldParam]) => {
     const valParams = params[fieldName].validate;
     // pass model as context to get access to root model in custom validator
@@ -115,9 +124,9 @@ export function getFieldsRulesByParams(params) {
  * @param valResult
  * @returns {string}
  */
-export function getFieldErrorMessageByValidation(valResult) {
+export function getFieldErrorMessageByValidation(valResult: ValidationLevel | undefined) {
   if (!valResult || !valResult.$error) return '';
-  const errors = [];
+  const errors: string[] = [];
   Object.keys(valResult.$params).forEach((ruleName) => {
     if (!valResult[ruleName]) {
       const ruleParams = valResult.$params[ruleName];
@@ -138,7 +147,7 @@ export function getFieldErrorMessageByValidation(valResult) {
   return errors.join('. ');
 }
 
-export function getFieldRuleByServerResponse(fieldName, value, message) {
+export function getFieldRuleByServerResponse(fieldName: string, value: any, message?: string) {
   const { notEql } = validators;
   const rule = notEql(value);
   return withParams({

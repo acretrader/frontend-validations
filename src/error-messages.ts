@@ -1,77 +1,82 @@
 import { startCase } from './utils';
 
-export function universal() {
+type argumentsType = {
+  validatorParam: any,
+  fieldName?: string,
+}
+
+export function universal(): string {
   return 'Does not meet the requirements';
 }
 
-export function minValue({ validatorParam, fieldName }) {
+export function minValue({ validatorParam, fieldName }: argumentsType): string {
   return `Minimum is ${fieldName === 'amount' ? '$' : ''}${validatorParam}`;
 }
 
-export function maxValue({ validatorParam, fieldName }) {
+export function maxValue({ validatorParam, fieldName }: argumentsType): string {
   return `Maximum is ${fieldName === 'amount' ? '$' : ''}${validatorParam}`;
 }
 
-export function minLength({ validatorParam }) {
+export function minLength({ validatorParam }: argumentsType): string {
   return `Too short (minimum is ${validatorParam} characters)`;
 }
 
-export function maxLength({ validatorParam }) {
+export function maxLength({ validatorParam }: argumentsType): string {
   return `Is too long (maximum is ${validatorParam} characters)`;
 }
 
-export function email() {
+export function email(): string {
   return 'Please provide a valid email address';
 }
 
-export function required() {
+export function required(): string {
   return 'Please complete';
 }
 
-export function atLeastOneFile() {
+export function atLeastOneFile(): string {
   return 'At least one file should be uploaded';
 }
 
-export function enoughBalance() {
+export function enoughBalance(): string {
   return 'There is currently not enough money in your AcreTrader wallet.';
 }
 
-export function oneOf() {
+export function oneOf(): string {
   return 'Should be one of options';
 }
 
-export function eql({ validatorParam }, value) {
+export function eql({ validatorParam }: argumentsType, value: any): string {
   // return different message if field is boolean (checkbox)
   return ((validatorParam && validatorParam === true) || value === false)
     ? '*Required'
     : `Should be ${validatorParam}`;
 }
 
-export function notEql({ validatorParam }) {
+export function notEql({ validatorParam }: argumentsType): string {
   return `Can't be ${validatorParam}`;
 }
 
-export function password() {
+export function password(): string {
   return 'Password must be a minimum of eight characters';
 }
 
-export function birthday() {
+export function birthday(): string {
   return 'Please enter a valid birth date';
 }
 
-export function legalAge() {
+export function legalAge(): string {
   return 'You must be at least 18 years old.';
 }
 
-export function futureDate() {
+export function futureDate(): string {
   return 'The date of birth you entered is in the future.';
 }
 
-export function ssn() {
+export function ssn(): string {
   return 'Please enter a valid SSN.';
 }
 
-export function sameAs({ validatorParam }) {
+export function sameAs({ validatorParam }: argumentsType): string {
   return `Should be the same as ${startCase(validatorParam)}`;
 }
 

@@ -1,18 +1,35 @@
 {
-  "name": "@acretrader/validdations",
+  "name": "@acretrader/validations",
   "version": "0.0.1",
   "description": "Form validations library based on Vue.js 2 reactivity system",
+  "author": "webdevelop.pro",
+  "license": "ISC",
+  "private": false,
+  "bugs": {
+    "url": "https://github.com/acretrader/general/issues"
+  },
+  "homepage": "https://github.com/acretrader/frontend-validations#readme",
   "scripts": {
     "build": "rm -rf dist/* && node_modules/typescript/bin/tsc"
   },
   "main": "dist/index.js",
-  "files": ["dist/"],
+  "files": [
+    "dist/"
+  ],
   "dependencies": {
     "lodash.get": "^4.4.2",
     "lodash.merge": "^4.6.2",
     "vue": "^2.6.12"
   },
   "devDependencies": {
+    "@types/lodash.merge": "^4.6.6",
     "typescript": "^4.2.3"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acretrader/frontend-validations.git"
+  },
+  "keywords": [
+    "js"
+  ]
 }

@@ -1,17 +1,19 @@
 import Vue from 'vue';
 import merge from 'lodash.merge';
+import { ModelType, RulesType} from "./types";
 import { isObject } from './utils';
 import { withParamsFuncName } from './helpers';
 
 export default class ValidationLevel {
+  [index: string]: any;
   private _dirty: boolean;
   private _parent: ValidationLevel | undefined;
   private _ownKey: string | undefined;
   private _model: object | undefined;
-  $rules: object;
-  $params: object;
+  $rules: RulesType;
+  $params: { [index: string]: object };
 
-  constructor(rules: object = {}, model: object | ValidationLevel, ownKey?: string) {
+  constructor(rules: object = {}, model: ModelType | ValidationLevel, ownKey?: string) {
     if (model instanceof  ValidationLevel) {
       this.$set('_parent', model);
     } else {
@@ -51,11 +53,11 @@ export default class ValidationLevel {
     return this.$dirty && this.$invalid;
   }
 
-  get $parentModel(): object | string | number | boolean | null {
+  get $parentModel(): ModelType | undefined {
     return this._parent ? this._parent.$model : null;
   }
 
-  get $model() : object | string | number | boolean {
+  get $model() : any {
     return this.$parentModel ? this.$parentModel[this._ownKey] : this._model;
   }
 
@@ -63,7 +65,7 @@ export default class ValidationLevel {
     Vue.set(model, name, value);
   }
 
-  $setAll(data: object, model: object = this) {
+  $setAll(data: object, model: ValidationLevel | ModelType = this) {
     if (!data || typeof data !== 'object') return;
     Object.entries(data)
       .forEach(([key, value]) => {
@@ -106,7 +108,7 @@ export default class ValidationLevel {
   private _setRules(): void {
     this._ruleKeys.forEach((k) => {
       if (this[k] !== undefined) return;
-      let validator = this.$rules[k];
+      let validator: Function = this.$rules[k];
       if (validator.name === withParamsFuncName) {
         const { $params, $validator } = validator();
         this.$params[k] = $params;
@@ -127,7 +129,7 @@ export default class ValidationLevel {
     this._setDirty(false);
   }
 
-  public $addRules(rules: object): void {
+  public $addRules(rules: RulesType): void {
     this.$setAll({ $rules: merge(this.$rules, rules) });
     this._setValidations();
   }

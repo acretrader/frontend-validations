@@ -12,9 +12,9 @@
   "scripts": {
     "build": "rm -rf dist/* && node_modules/typescript/bin/tsc"
   },
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "files": [
-    "src/*"
+    "dist/*"
   ],
   "dependencies": {
     "lodash.get": "^4.4.2",

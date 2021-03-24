@@ -1,6 +1,7 @@
+import { ModelType, RulesType } from "./types";
 import ValidationLevel from './ValidationLevel';
 
-export default function (rules: object, model: object): ValidationLevel {
+export default function (rules: RulesType, model: ModelType): ValidationLevel {
     return new ValidationLevel(rules, model);
 }
 

@@ -1,27 +1,38 @@
 import { upperFirst } from './utils';
 import * as validatorsImport from './validators';
 import * as errorMessagesImport from './error-messages';
-export const withParamsFuncName = '__validatorWithParams';
 const validators = validatorsImport;
 const errorMessages = errorMessagesImport;
+export const req = (value) => {
+    if (Array.isArray(value))
+        return !!value.length;
+    if (value === undefined || value === null) {
+        return false;
+    }
+    if (value === false) {
+        return true;
+    }
+    if (value instanceof Date) {
+        // invalid date won't pass
+        return !Number.isNaN(value.getTime());
+    }
+    return !!String(value).trim().length;
+};
+/**
+ * Add some params to rules. It can be useful to handle field validation error etc
+ * @param params
+ * @param validator
+ */
 export function withParams(params, validator) {
-    if (validator.name === withParamsFuncName) {
-        const { $params, $validator } = validator();
-        return withParams(Object.assign($params, params), $validator);
+    if (validator.__params) {
+        Object.assign(validator.__params, params);
+        return validator;
     }
-    return function __validatorWithParams() {
-        return {
-            $params: params,
-            $validator: (...args) => validator.apply(this, args),
-        };
-    };
-}
-export function getValidatorResult(validator, ...args) {
-    if (validator.name === withParamsFuncName) {
-        const { $validator } = validator();
-        validator = $validator; // eslint-disable-line no-param-reassign
+    else {
+        const validatorProxy = (...args) => validator.apply(this, args);
+        validatorProxy.__params = params;
+        return validatorProxy;
     }
-    return validator(...args);
 }
 /**
  * Get validator by validator name
@@ -66,8 +77,8 @@ export function getSingleFieldRulesByParams(params = {}, fieldName) {
         fieldRules[validatorKey] = withParams({ fieldName, validatorParam, message }, rule);
         // Add validator legal age by default to field birthday
         if (validatorKey === 'birthday') {
-            fieldRules.legalAge = withParams({ fieldName, validatorParam }, validators.legalAge());
-            fieldRules.futureDate = withParams({ fieldName, validatorParam }, validators.futureDate());
+            fieldRules.legalAge = withParams({ fieldName, validatorParam }, validators.legalAge(true));
+            fieldRules.futureDate = withParams({ fieldName, validatorParam }, validators.futureDate(true));
         }
     });
     return fieldRules;

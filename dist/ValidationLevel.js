@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import merge from 'lodash.merge';
 import { isObject } from './utils';
-import { withParamsFuncName } from './helpers';
 export default class ValidationLevel {
     constructor(rules = {}, model, ownKey) {
         if (model instanceof ValidationLevel) {
@@ -86,14 +85,13 @@ export default class ValidationLevel {
     }
     _setRules() {
         this._ruleKeys.forEach((k) => {
+            // Do not set validator if it exist
             if (this[k] !== undefined)
                 return;
-            let validator = this.$rules[k];
-            if (validator.name === withParamsFuncName) {
-                const { $params, $validator } = validator();
-                this.$params[k] = $params;
-                validator = $validator;
-            }
+            const validator = this.$rules[k];
+            if (typeof validator !== 'function')
+                return;
+            this.$params[k] = validator.__params || null;
             Object.defineProperty(this, k, {
                 get: () => validator.call(this, this.$model, (this.$parentModel || this.$model)),
                 enumerable: true,

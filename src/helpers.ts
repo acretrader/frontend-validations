@@ -1,40 +1,46 @@
 import { upperFirst } from './utils';
+import {
+  ValidatorType,
+  ValidatorMakerType,
+} from './types';
 import * as validatorsImport from './validators';
 import * as errorMessagesImport from './error-messages';
 import ValidationLevel from './ValidationLevel';
 
-export const withParamsFuncName = '__validatorWithParams';
-
-const validators: { [index: string]: Function } = validatorsImport;
+const validators: { [index: string]: ValidatorMakerType } = validatorsImport;
 const errorMessages: { [index: string]: Function} = errorMessagesImport;
 
-type withParamsResultType = {
-  [index: string]: object | Function,
-  $params: object,
-  $validator: Function
-}
 
-export function withParams(params: object, validator: Function): Function {
-  if (validator.name === withParamsFuncName) {
-    const { $params, $validator }: withParamsResultType = validator();
-    return withParams(Object.assign($params, params), $validator);
+export const req = (value: any): boolean => {
+  if (Array.isArray(value)) return !!value.length;
+  if (value === undefined || value === null) {
+    return false;
   }
-  return function __validatorWithParams(): withParamsResultType {
-    return {
-      $params: params,
-      $validator: (...args: any[]) => validator.apply(this, args),
-    };
-  };
-}
-
-export function getValidatorResult(validator: Function, ...args: any[]): boolean {
-  if (validator.name === withParamsFuncName) {
-    const { $validator }: withParamsResultType = validator();
-    validator = $validator; // eslint-disable-line no-param-reassign
+  if (value === false) {
+    return true;
   }
-  return validator(...args);
-}
+  if (value instanceof Date) {
+    // invalid date won't pass
+    return !Number.isNaN(value.getTime());
+  }
+  return !!String(value).trim().length;
+};
 
+/**
+ * Add some params to rules. It can be useful to handle field validation error etc
+ * @param params
+ * @param validator
+ */
+export function withParams(params: object, validator: ValidatorType): ValidatorType  {
+  if (validator.__params) {
+    Object.assign(validator.__params, params);
+    return validator;
+  } else {
+    const validatorProxy: ValidatorType = (...args: any[]) => validator.apply(this, args);
+    validatorProxy.__params = params;
+    return validatorProxy;
+  }
+}
 
 /**
  * Get validator by validator name
@@ -83,11 +89,11 @@ export function getSingleFieldRulesByParams(params: object = {}, fieldName: stri
     if (validatorKey === 'birthday') {
       fieldRules.legalAge = withParams(
           { fieldName, validatorParam },
-          validators.legalAge(),
+          validators.legalAge(true),
       );
       fieldRules.futureDate = withParams(
           { fieldName, validatorParam },
-          validators.futureDate(),
+          validators.futureDate(true),
       );
     }
   });

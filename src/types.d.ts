@@ -1,5 +1,10 @@
-interface Function {
-  name: string;
+interface ValidatorType {
+  (value: any, model?: ModelType): boolean;
+  __params?: object,
+}
+
+interface ValidatorMakerType {
+  (param: any, rootModel?: ModelType): ValidatorType
 }
 
 export type ModelType = {
@@ -7,6 +12,6 @@ export type ModelType = {
 }
 
 export type RulesType = {
-  // need to remove any type, but then I can't get access to 'name' property
-  [index: string]: RulesType | Function | any
+  [index: string]: RulesType | ValidatorType
 }
+

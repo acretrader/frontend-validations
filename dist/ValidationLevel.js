@@ -79,7 +79,7 @@ export default class ValidationLevel {
                 this[k].$addRules(this.$rules[k]);
             }
             else {
-                this[k] = new ValidationLevel(this.$rules[k], this, k);
+                this.$set(k, new ValidationLevel(this.$rules[k], this, k));
             }
         });
     }

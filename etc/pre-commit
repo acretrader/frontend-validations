@@ -1,0 +1,3 @@
+echo "Transpiling typescript to js..."
+yarn build
+exit 0

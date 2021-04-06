@@ -10,7 +10,8 @@
   },
   "homepage": "https://github.com/acretrader/frontend-validations#readme",
   "scripts": {
-    "build": "rm -rf dist/* && node_modules/typescript/bin/tsc"
+    "build": "rm -rf dist/* && node_modules/typescript/bin/tsc",
+    "postinstall": "sh etc/postinstall.sh"
   },
   "main": "dist/index.js",
   "files": [

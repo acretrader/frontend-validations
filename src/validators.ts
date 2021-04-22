@@ -185,7 +185,7 @@ export const requiredIfCheckbox = (param: [string, number], rootModel: ModelType
     (value: any) => {
       const rootValue = rootModel[param[0]];
       if (typeof rootValue !== 'number') return true;
-      rootValue & (2 ** param[1]) ? req(value) : true
+      return rootValue & (2 ** param[1]) ? req(value) : true
     },
 );
 

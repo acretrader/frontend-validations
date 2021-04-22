@@ -3,6 +3,25 @@
 
 \<api documentation will be here>
 
+##Installation
+```bash
+yarn add @acretrader/validations#latest
+```
+```javascript
+import validations from '@acretrader/validations';
+
+validations(rules, model);
+```
+
+
+
+##Example
+Example is a very simple vue project with integrated validation
+
+- clone or install
+- navigate to example/form-with-validation
+- run `yarn && yarn serve`
+
 
 ##Tags managing
 ###create tag

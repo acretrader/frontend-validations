@@ -109,7 +109,7 @@ export const requiredIfCheckbox = (param, rootModel) => withParams({ type: 'requ
     const rootValue = rootModel[param[0]];
     if (typeof rootValue !== 'number')
         return true;
-    rootValue & (2 ** param[1]) ? req(value) : true;
+    return rootValue & (2 ** param[1]) ? req(value) : true;
 });
 export const regex = (param) => withParams({ type: 'regex', value: param }, (value) => (!req(value) || new RegExp(param).test(value)));
 export const password = (param) => withParams({ type: 'password', value: param }, (value) => !req(value) || /\S{8,}/.test(value));

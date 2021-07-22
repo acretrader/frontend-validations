@@ -47,6 +47,10 @@ export default class ValidationLevel {
     return Boolean(this._dirty || (this._nestedKeys.length && this._nestedKeys.every(k => this[k].$dirty)));
   }
 
+  get $anyDirty(): boolean {
+    return Boolean(this._dirty || (this._nestedKeys.length && this._nestedKeys.some(k => this[k].$dirty)));
+  }
+
   get $invalid(): boolean {
     return this._ruleKeys.some((k: string): boolean => !this[k])
     || this._nestedKeys.some((k: string): boolean => this[k].$invalid);
@@ -54,6 +58,10 @@ export default class ValidationLevel {
 
   get $error(): boolean {
     return this.$dirty && this.$invalid;
+  }
+
+  get $anyError(): boolean {
+    return this.$anyDirty && this.$invalid;
   }
 
   get $parentModel(): ModelType | undefined {

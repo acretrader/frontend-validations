@@ -29,12 +29,18 @@ export default class ValidationLevel {
     get $dirty() {
         return Boolean(this._dirty || (this._nestedKeys.length && this._nestedKeys.every(k => this[k].$dirty)));
     }
+    get $anyDirty() {
+        return Boolean(this._dirty || (this._nestedKeys.length && this._nestedKeys.some(k => this[k].$dirty)));
+    }
     get $invalid() {
         return this._ruleKeys.some((k) => !this[k])
             || this._nestedKeys.some((k) => this[k].$invalid);
     }
     get $error() {
         return this.$dirty && this.$invalid;
+    }
+    get $anyError() {
+        return this.$anyDirty && this.$invalid;
     }
     get $parentModel() {
         return this._parent ? this._parent.$model : null;

@@ -37,10 +37,6 @@ export function atLeastOneFile(): string {
   return 'At least one file should be uploaded';
 }
 
-export function enoughBalance(): string {
-  return 'There is currently not enough money in your AcreTrader wallet.';
-}
-
 export function oneOf(): string {
   return 'Should be one of options';
 }

@@ -1,6 +1,6 @@
 {
   "name": "@acretrader/validations",
-  "version": "0.0.1-rc2",
+  "version": "0.0.1-rc5",
   "description": "Form validations library based on Vue.js 2 reactivity system",
   "author": "webdevelop.pro",
   "license": "MIT",

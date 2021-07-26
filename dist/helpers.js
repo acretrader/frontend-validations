@@ -118,16 +118,15 @@ export function getFieldErrorMessageByValidation(valResult) {
     if (!valResult || !valResult.$error)
         return '';
     const errors = [];
-    Object.keys(valResult.$params).forEach((ruleName) => {
+    Object.keys(valResult.$rules).forEach((ruleName) => {
         if (!valResult[ruleName]) {
             const ruleParams = valResult.$params[ruleName];
-            if (ruleParams && ruleParams.message) {
+            if (ruleParams?.message) {
                 errors.push(ruleParams.message);
             }
             else {
                 // try to get validator name by params or as rule name
-                const validatorName = ((ruleParams && ruleParams.type)
-                    || ruleName);
+                const validatorName = (ruleParams?.type || ruleName);
                 const messageFunc = errorMessages[validatorName] || errorMessages.universal;
                 // Pass rule params and value
                 errors.push(messageFunc((ruleParams || {}), valResult.$model));

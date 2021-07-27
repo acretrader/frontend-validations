@@ -1,3 +1,4 @@
+// @ts-ignore Vue is in peer dependencies
 import Vue from 'vue';
 import merge from 'lodash.merge';
 import { isObject } from './utils';

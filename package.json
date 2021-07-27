@@ -1,6 +1,6 @@
 {
   "name": "@acretrader/validations",
-  "version": "0.0.1-rc6",
+  "version": "0.0.1-rc7",
   "description": "Form validations library based on Vue.js 2 reactivity system",
   "author": "webdevelop.pro",
   "license": "MIT",
@@ -19,8 +19,7 @@
   ],
   "dependencies": {
     "lodash.get": "^4.4.2",
-    "lodash.merge": "^4.6.2",
-    "vue": "^2.6.12"
+    "lodash.merge": "^4.6.2"
   },
   "devDependencies": {
     "@types/lodash.get": "^4.4.6",

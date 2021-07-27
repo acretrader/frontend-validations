@@ -5,7 +5,7 @@
 
 ##Installation
 ```bash
-yarn add @acretrader/validations#latest
+ 
 ```
 ```javascript
 import validations from '@acretrader/validations';

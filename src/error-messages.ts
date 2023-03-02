@@ -60,6 +60,10 @@ export function birthday(): string {
   return 'Please enter a valid birth date';
 }
 
+export function date(): string {
+  return 'Please enter a valid date';
+}
+
 export function legalAge(): string {
   return 'You must be at least 18 years old.';
 }

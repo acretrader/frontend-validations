@@ -41,6 +41,9 @@ export function password() {
 export function birthday() {
     return 'Please enter a valid birth date';
 }
+export function date() {
+    return 'Please enter a valid date';
+}
 export function legalAge() {
     return 'You must be at least 18 years old.';
 }

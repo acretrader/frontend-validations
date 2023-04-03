@@ -157,6 +157,21 @@ export const requiredIfAnd = (param: object, rootModel: ModelType): ValidatorTyp
     }),
 );
 
+/**
+ * Return result of passed required validators
+ * @param {Object} param - list of validators
+ * @param {Object} rootModel
+ * @returns boolean
+ */
+export const requiredIfOr = (param: object, rootModel: ModelType): ValidatorType => withParams(
+    { type: 'requiredIfOr', value: param },
+    (value: any, model: ModelType) => Object.entries(param)
+        .every(([validatorName, validatorParam]): boolean => {
+          const validator: ValidatorMakerType = validators[validatorName];
+          return validator && validator(validatorParam, rootModel)(value, model);
+        }),
+);
+
 export const requiredUnless = (param: string): ValidatorType => withParams(
     { type: 'requiredUnless', value: param },
     (value: any, model: ModelType): boolean => (

@@ -93,6 +93,17 @@ export const requiredIfAnd = (param, rootModel) => withParams({ type: 'requiredI
     const validator = validators[validatorName];
     return validator && validator(validatorParam, rootModel)(value, model);
 }));
+/**
+ * Return result of passed required validators
+ * @param {Object} param - list of validators
+ * @param {Object} rootModel
+ * @returns boolean
+ */
+export const requiredIfOr = (param, rootModel) => withParams({ type: 'requiredIfOr', value: param }, (value, model) => Object.entries(param)
+    .every(([validatorName, validatorParam]) => {
+    const validator = validators[validatorName];
+    return validator && validator(validatorParam, rootModel)(value, model);
+}));
 export const requiredUnless = (param) => withParams({ type: 'requiredUnless', value: param }, (value, model) => (!get(model, param) ? req(value) : true));
 export const requiredUnlessAtRoot = (param, rootModel) => withParams({ type: 'requiredUnlessAtRoot', value: param }, (value) => (!get(rootModel, param) ? req(value) : true));
 /**

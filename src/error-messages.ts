@@ -86,4 +86,5 @@ export const requiredIfEqual = required;
 export const requiredIfNotEqual = required;
 export const requitedIfAtRoot = required;
 export const requiredIfAnd = required;
+export const requiredIfOr = required;
 export const requiredIfCheckbox = required;

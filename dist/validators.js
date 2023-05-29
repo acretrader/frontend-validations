@@ -11,7 +11,7 @@ const getLength = (value) => {
     }
     return String(value).length;
 };
-const birthdayValidator = (value) => {
+const dateValidator = (value) => {
     if (!req(value))
         return true;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(value))
@@ -93,6 +93,17 @@ export const requiredIfAnd = (param, rootModel) => withParams({ type: 'requiredI
     const validator = validators[validatorName];
     return validator && validator(validatorParam, rootModel)(value, model);
 }));
+/**
+ * Return result of passed required validators
+ * @param {Object} param - list of validators
+ * @param {Object} rootModel
+ * @returns boolean
+ */
+export const requiredIfOr = (param, rootModel) => withParams({ type: 'requiredIfOr', value: param }, (value, model) => Object.entries(param)
+    .every(([validatorName, validatorParam]) => {
+    const validator = validators[validatorName];
+    return validator && validator(validatorParam, rootModel)(value, model);
+}));
 export const requiredUnless = (param) => withParams({ type: 'requiredUnless', value: param }, (value, model) => (!get(model, param) ? req(value) : true));
 export const requiredUnlessAtRoot = (param, rootModel) => withParams({ type: 'requiredUnlessAtRoot', value: param }, (value) => (!get(rootModel, param) ? req(value) : true));
 /**
@@ -115,18 +126,19 @@ export const regex = (param) => withParams({ type: 'regex', value: param }, (val
 export const password = (param) => withParams({ type: 'password', value: param }, (value) => !req(value) || /\S{8,}/.test(value));
 export const email = (param) => withParams({ type: 'email', value: param }, (value) => !req(value) || emailRegex.test(value));
 export const futureDate = (param) => withParams({ type: 'futureDate', value: param }, (value) => {
-    if (!req(value) || !birthdayValidator(value))
+    if (!req(value) || !dateValidator(value))
         return true;
     return futureDateValidator(value);
 });
 export const legalAge = (param) => withParams({ type: 'legalAge', value: param }, (value) => {
-    if (!req(value) || !birthdayValidator(value)
+    if (!req(value) || !dateValidator(value)
         || !futureDateValidator(value))
         return true;
     const maxDateParam = +(new Date(new Date().setFullYear(new Date().getFullYear() - 18)));
     return +(new Date(value)) <= maxDateParam;
 });
-export const birthday = (param) => withParams({ type: 'birthday', value: param }, birthdayValidator);
+export const birthday = (param) => withParams({ type: 'birthday', value: param }, dateValidator);
+export const date = (param) => withParams({ type: 'date', value: param }, dateValidator);
 export const minLength = (param) => withParams({ type: 'minLength', value: param }, (value) => (!req(value) || getLength(value) >= param));
 export const maxLength = (param) => withParams({ type: 'maxLength', value: param }, (value) => (!req(value) || getLength(value) <= param));
 export const minValue = (param) => withParams({ type: 'minValue', value: param }, (value) => (!req(value) || ((!/\s/.test(value) || value instanceof Date) && +value >= +param)));
